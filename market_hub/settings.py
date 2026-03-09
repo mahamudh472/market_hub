@@ -35,6 +35,13 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    # Unfold must come before django.contrib.admin
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
+    'unfold.contrib.inlines',
+    'unfold.contrib.import_export',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,6 +54,8 @@ INSTALLED_APPS = [
     'main',
     'vendor',
     'products',
+    'cart',
+    'orders',
 
     'rest_framework',
     'rest_framework_simplejwt',
@@ -162,6 +171,194 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 
+# ─────────────────────────────────────────────────────────
+# Django Unfold Admin
+# ─────────────────────────────────────────────────────────
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
+
+UNFOLD = {
+    # ── Branding ────────────────────────────────────────────
+    "SITE_TITLE": "MarketHub",
+    "SITE_HEADER": "MarketHub Admin",
+    "SITE_URL": "/",
+    "SITE_ICON": None,
+    "SITE_LOGO": None,
+    "SITE_SYMBOL": "storefront",
+    "SITE_FAVICONS": [],
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SHOW_BACK_BUTTON": True,
+    "BORDER_RADIUS": "6px",
+    "ENVIRONMENT": "market_hub.settings.environment_callback",
+    "DASHBOARD_CALLBACK": None,
+    "THEME": "default",
+
+    # ── Colors — oklch() format required by Unfold 0.83 ─────
+    # Blue palette matching the storefront header colour
+    "COLORS": {
+        "primary": {
+            "50":  "oklch(97.7% .014 254.128)",
+            "100": "oklch(95.1% .031 253.572)",
+            "200": "oklch(90.2% .063 254.128)",
+            "300": "oklch(82.4% .119 253.572)",
+            "400": "oklch(72.7% .183 254.128)",
+            "500": "oklch(62.3% .214 253.572)",
+            "600": "oklch(54.6% .215 253.572)",
+            "700": "oklch(47.6% .193 253.572)",
+            "800": "oklch(42.4% .155 253.572)",
+            "900": "oklch(37.9% .120 252.435)",
+            "950": "oklch(28.2% .091 267.935)",
+        },
+    },
+
+    # ── Sidebar navigation ───────────────────────────────────
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": _("Dashboard"),
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": _("Overview"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("Catalog"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Categories"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:products_category_changelist"),
+                    },
+                    {
+                        "title": _("Products"),
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:products_product_changelist"),
+                    },
+                    {
+                        "title": _("Product Variants"),
+                        "icon": "tune",
+                        "link": reverse_lazy("admin:products_productvariant_changelist"),
+                    },
+                    {
+                        "title": _("Reviews"),
+                        "icon": "star",
+                        "link": reverse_lazy("admin:products_productreview_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Commerce"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Orders"),
+                        "icon": "receipt_long",
+                        "link": reverse_lazy("admin:orders_order_changelist"),
+                    },
+                    {
+                        "title": _("Payments"),
+                        "icon": "payments",
+                        "link": reverse_lazy("admin:orders_payment_changelist"),
+                    },
+                    {
+                        "title": _("Carts"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:cart_cart_changelist"),
+                    },
+                    {
+                        "title": _("Vouchers"),
+                        "icon": "local_offer",
+                        "link": reverse_lazy("admin:cart_voucher_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Users"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Users"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:accounts_user_changelist"),
+                    },
+                    {
+                        "title": _("Addresses"),
+                        "icon": "location_on",
+                        "link": reverse_lazy("admin:accounts_useraddress_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Vendors"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Vendor Profiles"),
+                        "icon": "store",
+                        "link": reverse_lazy("admin:vendor_vendorprofile_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Content"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Home Banners"),
+                        "icon": "view_carousel",
+                        "link": reverse_lazy("admin:main_homebanner_changelist"),
+                    },
+                    {
+                        "title": _("Delivery Charges"),
+                        "icon": "local_shipping",
+                        "link": reverse_lazy("admin:main_deliverycharge_changelist"),
+                    },
+                    {
+                        "title": _("Wishlists"),
+                        "icon": "favorite",
+                        "link": reverse_lazy("admin:main_wishlist_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Auth & Permissions"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Groups"),
+                        "icon": "group",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+
+}
+
+
+def environment_callback(request):
+    """Show a coloured environment badge in the header."""
+    if DEBUG:
+        return [_("Development"), "warning"]
+    return [_("Production"), "danger"]
+
+
+# ─────────────────────────────────────────────────────────
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
