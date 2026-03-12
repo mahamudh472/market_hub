@@ -16,7 +16,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"admin@mail.com\",\n    // \"email\": \"341black@virgilian.com\",\n    // \"email\": \"info.mahamudh473@gmail.com\",\n    // \"email\": \"info.mahamudh472@gmail.com\",\n    // \"email\": \"mdjuyelrana.com.bd1@gmail.com\",\n    \"password\": \"admin\"\n    // \"password\": \"l6x1ptl4vm\"\n}",
+					"raw": "{\n    \"email\": \"admin@mail.com\",\n    \"password\": \"admin\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
