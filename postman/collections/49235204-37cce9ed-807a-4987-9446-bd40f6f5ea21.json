@@ -1,0 +1,76 @@
+{
+	"info": {
+		"_postman_id": "49235204-37cce9ed-807a-4987-9446-bd40f6f5ea21",
+		"name": "makrket_hub",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "login",
+			"id": "49235204-49b6321b-3b04-4c85-9afe-6c4b6d7e7b4c",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"admin@mail.com\",\n    // \"email\": \"341black@virgilian.com\",\n    // \"email\": \"info.mahamudh473@gmail.com\",\n    // \"email\": \"info.mahamudh472@gmail.com\",\n    // \"email\": \"mdjuyelrana.com.bd1@gmail.com\",\n    \"password\": \"admin\"\n    // \"password\": \"l6x1ptl4vm\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/accounts/login/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"accounts",
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "home",
+			"id": "49235204-94e32d55-77c0-4acd-bb5f-f6933aab0eb5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"admin@mail.com\",\n    // \"email\": \"341black@virgilian.com\",\n    // \"email\": \"info.mahamudh473@gmail.com\",\n    // \"email\": \"info.mahamudh472@gmail.com\",\n    // \"email\": \"mdjuyelrana.com.bd1@gmail.com\",\n    \"password\": \"admin\"\n    // \"password\": \"l6x1ptl4vm\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/home/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"home",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
