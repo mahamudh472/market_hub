@@ -31,6 +31,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
+    
 
 class VerifyEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -55,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ['password', 'groups', 'user_permissions']
-        read_only_fields = ['id', 'email', 'joined_at', 'last_login', 'role']
+        read_only_fields = ['id', 'email', 'joined_at', 'last_login', 'role', 'is_active', 'is_staff', 'is_superuser']
 
 
 

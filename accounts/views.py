@@ -33,6 +33,15 @@ class RegisterView(GenericAPIView):
             if otp_send:
                 return Response({ "message": "Otp sent to your email"})
             return Response({"error": "Otp sent failed"})
+        # if emaail is already exist just send otp to email
+        email = request.data.get('email')
+        user = User.objects.filter(email=email).first()
+        if user and not user.is_active:
+            otp_send = send_otp_email(user)
+            if otp_send:
+                return Response({ "message": "Otp sent to your email"})
+            return Response({"error": "Otp sent failed"})
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyEmailView(GenericAPIView):
