@@ -54,7 +54,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = ['password']
+        exclude = ['password', 'groups', 'user_permissions']
+        read_only_fields = ['id', 'email', 'joined_at', 'last_login', 'role']
 
 
 
