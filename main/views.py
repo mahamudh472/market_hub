@@ -2,18 +2,9 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .utils.home import get_home_data
 from .models import Wishlist
 from .serializers import WishlistSerializer
 from products.models import Product
-
-
-class HomeAPIView(generics.GenericAPIView):
-    permission_classes = [permissions.AllowAny]
-
-    def get(self, request):
-        data = get_home_data(user=request.user if request.user.is_authenticated else None, request=request)
-        return Response({"data": data}, status=status.HTTP_200_OK)
 
 
 # ─────────────────────────────────────────
