@@ -14,8 +14,12 @@ class VendorProfile(models.Model):
     # Contact Info
     contact_email = models.EmailField(blank=True, null=True)
     contact_phone = models.CharField(max_length=20, blank=True, null=True)
+    secondary_phone = models.CharField(max_length=20, blank=True, null=True)
+    otp_number = models.CharField(max_length=6, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
+    zone = models.CharField(max_length=100, blank=True, null=True)
+    area = models.CharField(max_length=100, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
 
     # Status & trust

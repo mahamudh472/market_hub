@@ -297,6 +297,11 @@ UNFOLD = {
                         "icon": "location_on",
                         "link": reverse_lazy("admin:accounts_useraddress_changelist"),
                     },
+                    {
+                        "title": _("Customer Profiles"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:accounts_customerprofile_changelist"),
+                    },
                 ],
             },
             {

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from .models import User, UserAddress
+from .models import User, UserAddress, CustomerProfile
 
 
 @admin.register(User)
@@ -17,4 +17,10 @@ class UserAddressAdmin(ModelAdmin):
     list_display = ['user', 'label', 'city', 'country', 'is_default']
     list_filter = ['label', 'country', 'is_default']
     search_fields = ['user__email', 'city']
+    raw_id_fields = ['user']
+
+@admin.register(CustomerProfile)
+class CustomerProfileAdmin(ModelAdmin):
+    list_display = ['user']
+    search_fields = ['user__email', 'user__full_name']
     raw_id_fields = ['user']

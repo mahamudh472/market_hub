@@ -19,6 +19,7 @@ def send_otp_email(user: User):
         return False
 
     otp = str(random.randint(1000, 9999))
+    print(f"Generated OTP: {otp} for user: {user.email}")
 
     OTP.objects.create(
         user=user,

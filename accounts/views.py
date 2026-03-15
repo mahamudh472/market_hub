@@ -18,15 +18,37 @@ from accounts.models import User
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+    def post(self, request, user_type, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer:
+            try:
+                if user_type not in ['customer', 'vendor', 'admin']:
+                    return Response({"error": "Invalid user type"}, status=status.HTTP_400_BAD_REQUEST)
+                email = request.data.get('email')
+                user = User.objects.filter(email=email).first()
+                if user and user.role != user_type:
+                    return Response({"error": f"User is not a {user_type}"}, status=status.HTTP_400_BAD_REQUEST)
+                serializer.is_valid(raise_exception=True)
+
+            except Exception as e:
+                pass
+        return super().post(request, *args, **kwargs)
+
 
 
 class RegisterView(GenericAPIView):
     serializer_class = RegisterSerializer
 
-    def post(self, request):
-        if self.serializer_class:
-            serializer = self.serializer_class(data=request.data)
+    def post(self, request, user_type):
+        if not self.serializer_class:
+            return Response({"error": "Serializer class not defined"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
+            if user_type not in ['customer', 'vendor']:
+                return Response({"error": "Invalid user type"}, status=status.HTTP_400_BAD_REQUEST)
+        
+            serializer.validated_data['role'] = user_type
             user = serializer.save()
 
             otp_send = send_otp_email(user)

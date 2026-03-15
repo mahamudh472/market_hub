@@ -21,7 +21,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class Role(models.TextChoices):
-    USER = 'user', 'User'
+    CUSTOMER = 'customer', 'Customer'
     VENDOR = 'vendor', 'Vendor'
     ADMIN = 'admin', 'Admin'
 
@@ -45,7 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER)
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
     
     objects = UserManager()
 
@@ -57,6 +57,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+class CustomerProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
 
 
 class OTP(models.Model):

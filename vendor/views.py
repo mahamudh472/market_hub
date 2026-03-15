@@ -6,6 +6,17 @@ from .models import VendorProfile
 from .serializers import VendorDetailSerializer
 from products.models import Product, Category
 from products.serializers import SimpleProductSerializer, CategorySerializer
+from .paginations import StandardResultsSetPagination
+
+
+class StoreListView(generics.ListAPIView):
+    """
+    List of all active stores. Returns basic info + avg rating.
+    """
+    permission_classes = [permissions.AllowAny]
+    serializer_class = VendorDetailSerializer
+    pagination_class = StandardResultsSetPagination
+    queryset = VendorProfile.objects.filter(is_active=True).order_by('-created_at')
 
 
 class StoreDetailView(generics.RetrieveAPIView):
@@ -17,6 +28,19 @@ class StoreDetailView(generics.RetrieveAPIView):
     serializer_class = VendorDetailSerializer
     lookup_field = 'slug'
     queryset = VendorProfile.objects.filter(is_active=True)
+
+    def get_permissions(self):
+        if self.kwargs.get('slug') is None:
+            return [permissions.IsAuthenticated()]
+        return super().get_permissions()
+
+    def get_object(self):
+        slug = self.kwargs.get('slug')
+        if slug:
+            return VendorProfile.objects.get(slug=slug, is_active=True)
+        else:
+            # If no slug provided, return the vendor profile of the authenticated user
+            return self.request.user.vendor_profile
 
     def retrieve(self, request, *args, **kwargs):
         vendor = self.get_object()

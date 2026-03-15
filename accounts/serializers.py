@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import User
+from accounts.models import User, CustomerProfile, UserAddress
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .utils import send_otp_email
 
@@ -25,6 +25,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             email=validated_data['email'],
             full_name=validated_data.get('full_name', ''),
+            role=validated_data.get('role', 'customer')
         )
         user.set_password(validated_data['password'])
         user.is_active = False  # User will be activated after email verification
@@ -58,5 +59,10 @@ class UserSerializer(serializers.ModelSerializer):
         exclude = ['password', 'groups', 'user_permissions']
         read_only_fields = ['id', 'email', 'joined_at', 'last_login', 'role', 'is_active', 'is_staff', 'is_superuser']
 
+class CustomerProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerProfile
+        fields = '__all__'
+        read_only_fields = ['user']
 
 
