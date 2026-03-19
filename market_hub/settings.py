@@ -378,3 +378,10 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+# Pathao API Configuration
+PATHAO_CLIENT_ID = os.getenv('PATHAO_CLIENT_ID')
+PATHAO_CLIENT_SECRET = os.getenv('PATHAO_CLIENT_SECRET')
+PATHAO_API_BASE_URL = os.getenv('PATHAO_API_BASE_URL', 'https://api.pathao.com/v1/')
+PATHAO_USERNAME = os.getenv('PATHAO_USERNAME')
+PATHAO_PASSWORD = os.getenv('PATHAO_PASSWORD')
