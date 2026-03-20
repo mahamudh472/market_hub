@@ -26,4 +26,31 @@ def get_cities(access_token):
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         return response.json()['data'].get("data", [])
-    else:        raise Exception(f"Failed to get cities: {response.text}")
+    else:        
+        raise Exception(f"Failed to get cities: {response.text}")
+
+def get_zones(access_token, city_id):
+    base_url = settings.PATHAO_API_BASE_URL
+    url = f"{base_url}/aladdin/api/v1/cities/{city_id}/zone-list"
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+    print(f"Requesting zones for city_id={city_id} with URL: {url}")  # Debug log
+    response = requests.get(url, headers=headers)
+    print(f"Get zones response: {response.status_code} - {response.text}")  # Debug log
+    if response.status_code == 200:
+        return response.json()['data'].get("data", [])
+    else:
+        raise Exception(f"Failed to get zones: {response.text}")
+
+def get_areas(access_token, zone_id):
+    base_url = settings.PATHAO_API_BASE_URL
+    url = f"{base_url}/aladdin/api/v1/zones/{zone_id}/area-list"
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.json()['data'].get("data", [])
+    else:
+        raise Exception(f"Failed to get areas: {response.text}")
