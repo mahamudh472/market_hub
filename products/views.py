@@ -1,7 +1,6 @@
-from django.db.models import Count, Avg, Q
-from rest_framework import generics, permissions, status, filters
+from django.db.models import Count, Q
+from rest_framework import generics, permissions
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Product, Category, ProductReview
 from .serializers import (
