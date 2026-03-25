@@ -7,6 +7,8 @@ from .serializers import VendorDetailSerializer
 from products.models import Product, Category
 from products.serializers import SimpleProductSerializer, CategorySerializer
 from .paginations import StandardResultsSetPagination
+from accounts.permissions import IsVendorOwner
+from rest_framework.exceptions import NotFound
 
 
 class StoreListView(generics.ListAPIView):
@@ -31,16 +33,19 @@ class StoreDetailView(generics.RetrieveAPIView):
 
     def get_permissions(self):
         if self.kwargs.get('slug') is None:
-            return [permissions.IsAuthenticated()]
+            return [IsVendorOwner()]
         return super().get_permissions()
 
     def get_object(self):
         slug = self.kwargs.get('slug')
-        if slug:
-            return VendorProfile.objects.get(slug=slug, is_active=True)
-        else:
-            # If no slug provided, return the vendor profile of the authenticated user
-            return self.request.user.vendor_profile
+        try:
+            if slug:
+                return VendorProfile.objects.get(slug=slug, is_active=True)
+            else:
+                # If no slug provided, return the vendor profile of the authenticated user
+                return self.request.user.vendor_profile
+        except VendorProfile.DoesNotExist:
+            raise NotFound("Vendor not found.")
 
     def retrieve(self, request, *args, **kwargs):
         vendor = self.get_object()
