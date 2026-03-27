@@ -8,6 +8,7 @@ from accounts.serializers import (
     ResetPasswordConfirmSerializer,
     RegisterSerializer,
     UserSerializer, 
+    CustomerProfileSerializer,
     VerifyEmailSerializer,
     ChangePasswordSerializer
 )
@@ -165,10 +166,10 @@ class CheckOTPView(GenericAPIView):
             return Response({"error": "OTP is invalid or expired"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfileView(GenericAPIView):
-    serializer_class = UserSerializer
+    serializer_class = CustomerProfileSerializer
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        user = request.user
+        user = request.user.customer_profile
         if self.serializer_class:
             serializer = self.serializer_class(user)
 

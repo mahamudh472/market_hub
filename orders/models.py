@@ -122,3 +122,29 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment({self.order.order_number}, {self.method}, {self.status})"
+
+# Pathao address db
+class PathaoCity(models.Model):
+    city_id = models.IntegerField(primary_key=True)
+    city_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.city_name
+
+class PathaoZone(models.Model):
+    zone_id = models.IntegerField(primary_key=True)
+    zone_name = models.CharField(max_length=255)
+    city = models.ForeignKey(PathaoCity, on_delete=models.CASCADE, related_name='zones')
+
+    def __str__(self):
+        return f"{self.zone_name} ({self.city.city_name})"
+
+class PathaoArea(models.Model):
+    area_id = models.IntegerField(primary_key=True)
+    area_name = models.CharField(max_length=255)
+    zone = models.ForeignKey(PathaoZone, on_delete=models.CASCADE, related_name='areas')
+    home_delivery_available = models.BooleanField(default=False)
+    pickup_available = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.area_name} ({self.zone.zone_name}, {self.zone.city.city_name})"

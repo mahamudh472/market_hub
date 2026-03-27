@@ -1,6 +1,7 @@
 
 from django.conf import settings
 import requests
+from orders.models import PathaoCity, PathaoZone, PathaoArea
 
 def get_access_token():
     base_url = settings.PATHAO_API_BASE_URL
@@ -55,3 +56,31 @@ def get_areas(access_token, zone_id):
         return response.json()['data'].get("data", [])
     else:
         raise Exception(f"Failed to get areas: {response.text}")
+
+def update_pathao_data():
+    try:
+        access_token = get_access_token()
+        cities = get_cities(access_token)
+        print(f"Fetched {len(cities)} cities from Pathao API")  # Debug log
+        for city in cities:
+            city_obj, created = PathaoCity.objects.update_or_create(
+                city_id=city['city_id'],
+                defaults={'city_name': city['city_name']}
+            )
+            zones = get_zones(access_token, city['city_id'])
+            print(f"Fetched {len(zones)} zones for city {city['city_name']}")  # Debug log
+            for zone in zones:
+                zone_obj, created = PathaoZone.objects.update_or_create(
+                    zone_id=zone['zone_id'],
+                    defaults={'zone_name': zone['zone_name'], 'city': city_obj}
+                )
+                areas = get_areas(access_token, zone['zone_id'])
+                print(f"Fetched {len(areas)} areas for zone {zone['zone_name']}")  # Debug log
+                for area in areas:
+                    PathaoArea.objects.update_or_create(
+                        area_id=area['area_id'],
+                        defaults={'area_name': area['area_name'], 'zone': zone_obj}
+                    )
+        print("Pathao data updated successfully.")
+    except Exception as e:
+        print(f"Error updating Pathao data: {e}")

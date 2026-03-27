@@ -2,6 +2,7 @@ from rest_framework import serializers
 from accounts.models import User, CustomerProfile, UserAddress
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .utils import send_otp_email
+from orders.serializers import SimpleOrderSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -60,9 +61,18 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'email', 'joined_at', 'last_login', 'role', 'is_active', 'is_staff', 'is_superuser']
 
 class CustomerProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    recent_orders = serializers.SerializerMethodField()
+    total_orders = serializers.IntegerField(source='user.orders.count', read_only=True)
+    total_saved_addresses = serializers.IntegerField(source='user.addresses.count', read_only=True)
+
     class Meta:
         model = CustomerProfile
         fields = '__all__'
         read_only_fields = ['user']
+
+    def get_recent_orders(self, obj):
+        orders = obj.user.orders.all().order_by('-created_at')[:5]
+        return SimpleOrderSerializer(orders, many=True).data
 
 

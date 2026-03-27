@@ -34,3 +34,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'items', 'payment',
             'created_at', 'updated_at',
         ]
+
+class SimpleOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'order_number', 'status', 'total', 'created_at']
