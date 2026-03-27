@@ -148,3 +148,16 @@ class PathaoArea(models.Model):
 
     def __str__(self):
         return f"{self.area_name} ({self.zone.zone_name}, {self.zone.city.city_name})"
+
+class PathaoSyncProgress(models.Model):
+    last_synced_at = models.DateTimeField(auto_now=True)
+    total_cities = models.IntegerField(default=0)
+    cities = models.JSONField(default=list)  # [{"city_id": 1, "city_name": "Dhaka"}, ...]
+    synced_cities_ids = models.JSONField(default=list)  # [1, 2, 3, ...]
+    synced_zones_ids = models.JSONField(default=list)  # [1, 2, 3, ...]
+    synced_areas_ids = models.JSONField(default=list)  # [1, 2, 3, ...]
+
+    status = models.CharField(max_length=20, default='pending')  # pending, in_progress, completed, failed
+
+    def __str__(self):
+        return f"Last Synced: {self.last_synced_at}, Cities: {self.total_cities}"
