@@ -97,9 +97,20 @@ class UserAddress(models.Model):
     phone_number = models.CharField(max_length=20)
     address_line1 = models.CharField(max_length=255)
     address_line2 = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100, blank=True, null=True)
-    postal_code = models.CharField(max_length=20)
+    # Pathao-linked city & zone (used for delivery charge calculation)
+    city = models.ForeignKey(
+        'orders.PathaoCity',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='user_addresses',
+    )
+    zone = models.ForeignKey(
+        'orders.PathaoZone',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='user_addresses',
+    )
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
     country = models.CharField(max_length=100, default='Bangladesh')
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -109,7 +120,8 @@ class UserAddress(models.Model):
         ordering = ['-is_default', '-created_at']
 
     def __str__(self):
-        return f"{self.user.email} — {self.label} ({self.city})"
+        city_name = self.city.city_name if self.city else 'N/A'
+        return f"{self.user.email} — {self.label} ({city_name})"
 
     def save(self, *args, **kwargs):
         # Only one default address per user

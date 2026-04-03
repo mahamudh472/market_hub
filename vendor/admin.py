@@ -16,20 +16,27 @@ class VendorProfileForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         instance = kwargs.get('instance')
 
-        # Always start zone/area with none — populated via AJAX
-        self.fields['zone'].queryset = PathaoZone.objects.none()
-        self.fields['area'].queryset = PathaoArea.objects.none()
+        # Determine city/zone from POST data (form submission) or saved instance
+        data = args[0] if args else None
+        submitted_city_id = data.get('city') if data else None
+        submitted_zone_id = data.get('zone') if data else None
 
-        if instance:
-            # Pre-load only the relevant options so the selected value renders
-            if instance.city_id:
-                self.fields['zone'].queryset = PathaoZone.objects.filter(city_id=instance.city_id)
-            if instance.zone_id:
-                self.fields['area'].queryset = PathaoArea.objects.filter(zone_id=instance.zone_id)
+        city_id = submitted_city_id or (instance.city_id if instance else None)
+        zone_id = submitted_zone_id or (instance.zone_id if instance else None)
+
+        # Zone: load options scoped to the active city; fallback to none
+        if city_id:
+            self.fields['zone'].queryset = PathaoZone.objects.filter(city_id=city_id)
+        else:
+            self.fields['zone'].queryset = PathaoZone.objects.none()
+
+        # Area: load options scoped to the active zone; fallback to none
+        if zone_id:
+            self.fields['area'].queryset = PathaoArea.objects.filter(zone_id=zone_id)
+        else:
+            self.fields['area'].queryset = PathaoArea.objects.none()
 
         # Attach data attributes so JS knows which IDs are currently selected
-        city_id = instance.city_id if instance else None
-        zone_id = instance.zone_id if instance else None
         self.fields['zone'].widget.attrs.update({'data-city-id': city_id or ''})
         self.fields['area'].widget.attrs.update({'data-zone-id': zone_id or ''})
 

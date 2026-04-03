@@ -16,16 +16,22 @@ class VendorProfile(models.Model):
     contact_email = models.EmailField(blank=True, null=True)
     contact_phone = models.CharField(max_length=20, blank=True, null=True)
     secondary_phone = models.CharField(max_length=20, blank=True, null=True)
-    otp_number = models.CharField(max_length=6, blank=True, null=True)
+    otp_number = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     city = models.ForeignKey(PathaoCity, on_delete=models.SET_NULL, null=True, blank=True, related_name='vendors')
     zone = models.ForeignKey(PathaoZone, on_delete=models.SET_NULL, null=True, blank=True, related_name='vendors')
     area = models.ForeignKey(PathaoArea, on_delete=models.SET_NULL, null=True, blank=True, related_name='vendors')
     country = models.CharField(max_length=100, blank=True, null=True)
 
+    pathao_store_id = models.CharField(max_length=255, blank=True, null=True)  # Store ID from Pathao API
+    pathao_store_status = models.CharField(max_length=50, blank=True, null=True)  # e.g., 'active', 'inactive', 'pending'
+    pathao_store_name = models.CharField(max_length=255, blank=True, null=True)  # Store name as registered in Pathao
+
     # Status & trust
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+
+    profile_completed = models.BooleanField(default=False)  # Set to True when all required fields are filled
 
     # Aggregate rating (updated via signal/task)
     avg_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)

@@ -1,5 +1,6 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
+from rest_framework import status as drf_status
 
 from .models import Order
 from .serializers import OrderSerializer
@@ -44,3 +45,126 @@ class Test_pathao(generics.GenericAPIView):
             return Response({"cities": cities, "zones": zones_inside_first_city, "areas": areas_inside_first_zone})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+class GetStoresView(generics.GenericAPIView):
+    """Test view to get stores from Pathao API."""
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            from .utils.pathao_util import get_stores
+            access_token = get_access_token()
+            stores = get_stores(access_token)
+            return Response({"stores": stores})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class CreateStoreView(generics.GenericAPIView):
+    """Test view to create a store in Pathao API."""
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            from .utils.pathao_util import create_store
+            access_token = get_access_token()
+            store_data = {
+                "name": "Demo Store 12345",
+                "contact_name": "Test Merchant",
+                "contact_number": "01700000000",
+                # "contact_email": "info.vendor@gmail.com",
+                "secondary_contact": "01500000000",
+                "otp_number": "01700000000",
+                "address": "House 123, Road 4, Sector 10, Uttara, Dhaka-1230, Bangladesh",
+                "city_id": 1,  # Example city_id
+                "zone_id": 1,  # Example zone_id
+                "area_id": 1   # Example area_id
+            }
+            response = create_store(access_token, **store_data)
+            return Response({"store_creation_response": response})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
+class CalculateDeliveryChargeView(generics.GenericAPIView):
+    """
+    Calculate the Pathao delivery charge for a given vendor store and
+    a user's saved address.
+
+    POST body:
+        {
+            "vendor_id": <int>,          # VendorProfile pk
+            "address_id": <int>,         # UserAddress pk
+            "item_type": <int>,          # Pathao item type (default 2)
+            "delivery_type": <int>,      # Pathao delivery type (default 48)
+            "item_weight": <float>       # weight in kg (default 0.5)
+        }
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        from .utils.pathao_util import get_price_plan
+        from vendor.models import VendorProfile
+        from accounts.models import UserAddress
+
+        vendor_id = request.data.get('vendor_id')
+        address_id = request.data.get('address_id')
+        item_type = int(request.data.get('item_type', 2))
+        delivery_type = int(request.data.get('delivery_type', 48))
+        item_weight = float(request.data.get('item_weight', 0.5))
+
+        if not vendor_id or not address_id:
+            return Response(
+                {"error": "'vendor_id' and 'address_id' are required."},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # --- Fetch vendor and its Pathao store id ---
+        try:
+            vendor = VendorProfile.objects.get(pk=vendor_id)
+        except VendorProfile.DoesNotExist:
+            return Response(
+                {"error": f"Vendor with id={vendor_id} not found."},
+                status=drf_status.HTTP_404_NOT_FOUND,
+            )
+
+        if not vendor.pathao_store_id:
+            return Response(
+                {"error": "This vendor does not have a Pathao store configured yet."},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        # --- Fetch user address and extract city / zone ---
+        try:
+            address = UserAddress.objects.select_related('city', 'zone').get(
+                pk=address_id, user=request.user
+            )
+        except UserAddress.DoesNotExist:
+            return Response(
+                {"error": f"Address with id={address_id} not found for this user."},
+                status=drf_status.HTTP_404_NOT_FOUND,
+            )
+
+        if not address.city or not address.zone:
+            return Response(
+                {"error": "The selected address does not have a Pathao city and zone set."},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        recipient_city = address.city.city_id
+        recipient_zone = address.zone.zone_id
+
+        try:
+            access_token = get_access_token()
+            price_data = get_price_plan(
+                access_token=access_token,
+                store_id=int(vendor.pathao_store_id),
+                item_type=item_type,
+                delivery_type=delivery_type,
+                item_weight=item_weight,
+                recipient_city=recipient_city,
+                recipient_zone=recipient_zone,
+            )
+            return Response({"delivery_charge": price_data}, status=drf_status.HTTP_200_OK)
+
+        except Exception as exc:
+            return Response({"error": str(exc)}, status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR)
