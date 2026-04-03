@@ -21,8 +21,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'email', 'password']
+        fields = ['id', 'full_name', 'role', 'email', 'password']
+
+    def validate_role(self, value):
+        if value not in ['customer', 'vendor']:
+            raise serializers.ValidationError("Role must be either 'customer' or 'vendor'")
+        return value
+
     def create(self, validated_data):
+        print("Creating user with data:", validated_data)
         user = User.objects.create_user(
             email=validated_data['email'],
             full_name=validated_data.get('full_name', ''),

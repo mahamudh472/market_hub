@@ -1,5 +1,5 @@
 from django.db.models import Count, Q
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
 from .models import Product, Category, ProductReview
@@ -9,6 +9,8 @@ from .serializers import (
     CategorySerializer,
     ProductReviewSerializer,
 )
+from .paginations import DefaultPagination
+from rest_framework import status
 
 
 class CategoryListView(generics.ListAPIView):
@@ -155,6 +157,7 @@ class ProductReviewListView(generics.ListAPIView):
     """Paginated reviews for a given product."""
     permission_classes = [permissions.AllowAny]
     serializer_class = ProductReviewSerializer
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         product_id = self.kwargs['product_id']
@@ -178,11 +181,21 @@ class ProductReviewCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         product_id = self.kwargs['product_id']
         product = generics.get_object_or_404(Product, pk=product_id)
+
         # One review per user per product
         if ProductReview.objects.filter(product=product, user=self.request.user).exists():
             raise serializers.ValidationError("You have already reviewed this product.")
+
         serializer.save(user=self.request.user, product=product)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-# Fix missing import
-from rest_framework import serializers
+        self.perform_create(serializer)
+
+        return Response(
+            {"message": "Review submitted successfully."},
+            status=status.HTTP_201_CREATED
+        )
+

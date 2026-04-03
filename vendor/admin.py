@@ -1,12 +1,71 @@
+from django import forms
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 from .models import VendorProfile
+from django.urls import path
+from django.http import JsonResponse
+from orders.models import PathaoCity, PathaoZone, PathaoArea
+
+
+class VendorProfileForm(forms.ModelForm):
+    class Meta:
+        model = VendorProfile
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+
+        # Always start zone/area with none — populated via AJAX
+        self.fields['zone'].queryset = PathaoZone.objects.none()
+        self.fields['area'].queryset = PathaoArea.objects.none()
+
+        if instance:
+            # Pre-load only the relevant options so the selected value renders
+            if instance.city_id:
+                self.fields['zone'].queryset = PathaoZone.objects.filter(city_id=instance.city_id)
+            if instance.zone_id:
+                self.fields['area'].queryset = PathaoArea.objects.filter(zone_id=instance.zone_id)
+
+        # Attach data attributes so JS knows which IDs are currently selected
+        city_id = instance.city_id if instance else None
+        zone_id = instance.zone_id if instance else None
+        self.fields['zone'].widget.attrs.update({'data-city-id': city_id or ''})
+        self.fields['area'].widget.attrs.update({'data-zone-id': zone_id or ''})
 
 
 @admin.register(VendorProfile)
 class VendorProfileAdmin(ModelAdmin):
+    form = VendorProfileForm
     list_display = ['name', 'user', 'city', 'is_verified', 'is_active', 'avg_rating', 'created_at']
     list_filter = ['is_verified', 'is_active', 'country']
     search_fields = ['name', 'user__email', 'city']
     raw_id_fields = ['user']
     list_fullwidth = True
+
+    class Media:
+        js = ('vendor/js/vendor_location_dropdown.js',)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('ajax/load-zones/', self.admin_site.admin_view(self.load_zones), name='ajax_load_zones'),
+            path('ajax/load-areas/', self.admin_site.admin_view(self.load_areas), name='ajax_load_areas'),
+        ]
+        return custom_urls + urls
+
+    def load_zones(self, request):
+        city_id = request.GET.get('city_id')
+        if city_id:
+            zones = PathaoZone.objects.filter(city_id=city_id).values('zone_id', 'zone_name')
+        else:
+            zones = []
+        return JsonResponse(list(zones), safe=False)
+
+    def load_areas(self, request):
+        zone_id = request.GET.get('zone_id')
+        if zone_id:
+            areas = PathaoArea.objects.filter(zone_id=zone_id).values('area_id', 'area_name')
+        else:
+            areas = []
+        return JsonResponse(list(areas), safe=False)

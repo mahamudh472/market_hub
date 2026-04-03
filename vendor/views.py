@@ -11,6 +11,23 @@ from accounts.permissions import IsVendorOwner
 from rest_framework.exceptions import NotFound
 
 
+class VendorProfileView(generics.RetrieveUpdateAPIView):
+    """
+    Vendor profile management for authenticated vendors.
+    GET returns their own profile, PUT/PATCH allows updates.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsVendorOwner]
+    serializer_class = VendorDetailSerializer
+    lookup_field = 'slug'
+
+    def get_object(self):
+        # Return the vendor profile of the authenticated user
+        try:
+            return self.request.user.vendor_profile
+        except VendorProfile.DoesNotExist:
+            raise NotFound("Vendor profile not found for this user.")
+
+
 class StoreListView(generics.ListAPIView):
     """
     List of all active stores. Returns basic info + avg rating.

@@ -3,6 +3,7 @@ from . import views
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
+from vendor.views import VendorProfileView
 
 
 urlpatterns = [
@@ -18,6 +19,6 @@ urlpatterns = [
     path('change-password/', views.ChangePasswordView.as_view(), name='change_password'),
     path('customer/profile/', views.ProfileView.as_view(), name='profile'),
     path('customer/profile/update/', views.UpdateProfileView.as_view(), name='profile_update'),
-    path('vendor/profile/', views.ProfileView.as_view(), name='profile'),
-    path('vendor/profile/update/', views.UpdateProfileView.as_view(), name='profile_update'),
+    path('vendor/profile/', VendorProfileView.as_view(), name='profile'),
+    path('vendor/profile/update/', VendorProfileView.as_view(), name='profile_update'),
 ]

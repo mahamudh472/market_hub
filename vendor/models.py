@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import User
 from autoslug import AutoSlugField
+from orders.models import PathaoCity, PathaoZone, PathaoArea
 
 
 class VendorProfile(models.Model):
@@ -17,9 +18,9 @@ class VendorProfile(models.Model):
     secondary_phone = models.CharField(max_length=20, blank=True, null=True)
     otp_number = models.CharField(max_length=6, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    city = models.CharField(max_length=100, blank=True, null=True)
-    zone = models.CharField(max_length=100, blank=True, null=True)
-    area = models.CharField(max_length=100, blank=True, null=True)
+    city = models.ForeignKey(PathaoCity, on_delete=models.SET_NULL, null=True, blank=True, related_name='vendors')
+    zone = models.ForeignKey(PathaoZone, on_delete=models.SET_NULL, null=True, blank=True, related_name='vendors')
+    area = models.ForeignKey(PathaoArea, on_delete=models.SET_NULL, null=True, blank=True, related_name='vendors')
     country = models.CharField(max_length=100, blank=True, null=True)
 
     # Status & trust
