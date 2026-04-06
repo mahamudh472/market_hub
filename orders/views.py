@@ -1,10 +1,31 @@
+from django.conf import settings
+from django.core.cache import cache
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status as drf_status
+from rest_framework.views import APIView
 
-from .models import Order
-from .serializers import OrderSerializer
+from .models import Order, PathaoCity, PathaoZone, PathaoArea
+from .serializers import (
+    OrderSerializer,
+    PathaoCitySerializer,
+    PathaoZoneSerializer,
+    PathaoAreaSerializer,
+)
 from .utils.pathao_util import get_access_token, get_cities, get_zones, get_areas
+
+
+PATHAO_LOCATION_CACHE_TIMEOUT = getattr(settings, 'PATHAO_LOCATION_CACHE_TIMEOUT', 60 * 60 * 24)
+
+
+def _cached_list_response(cache_key, builder):
+    cached_data = cache.get(cache_key)
+    if cached_data is not None:
+        return cached_data
+
+    data = builder()
+    cache.set(cache_key, data, PATHAO_LOCATION_CACHE_TIMEOUT)
+    return data
 
 
 class OrderListView(generics.ListAPIView):
@@ -168,3 +189,75 @@ class CalculateDeliveryChargeView(generics.GenericAPIView):
 
         except Exception as exc:
             return Response({"error": str(exc)}, status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PathaoCityListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        cache_key = 'pathao:cities:v1'
+
+        def build_data():
+            queryset = PathaoCity.objects.all().order_by('city_name')
+            return PathaoCitySerializer(queryset, many=True).data
+
+        data = _cached_list_response(cache_key, build_data)
+        return Response({'count': len(data), 'results': data}, status=drf_status.HTTP_200_OK)
+
+
+class PathaoZoneListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        city_id = request.query_params.get('city_id')
+        if not city_id:
+            return Response(
+                {'detail': 'city_id query parameter is required.'},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            city_id = int(city_id)
+        except (TypeError, ValueError):
+            return Response(
+                {'detail': 'city_id must be a valid integer.'},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        cache_key = f'pathao:zones:v1:{city_id}'
+
+        def build_data():
+            queryset = PathaoZone.objects.filter(city_id=city_id).order_by('zone_name')
+            return PathaoZoneSerializer(queryset, many=True).data
+
+        data = _cached_list_response(cache_key, build_data)
+        return Response({'city_id': city_id, 'count': len(data), 'results': data}, status=drf_status.HTTP_200_OK)
+
+
+class PathaoAreaListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        zone_id = request.query_params.get('zone_id')
+        if not zone_id:
+            return Response(
+                {'detail': 'zone_id query parameter is required.'},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            zone_id = int(zone_id)
+        except (TypeError, ValueError):
+            return Response(
+                {'detail': 'zone_id must be a valid integer.'},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        cache_key = f'pathao:areas:v1:{zone_id}'
+
+        def build_data():
+            queryset = PathaoArea.objects.filter(zone_id=zone_id).order_by('area_name')
+            return PathaoAreaSerializer(queryset, many=True).data
+
+        data = _cached_list_response(cache_key, build_data)
+        return Response({'zone_id': zone_id, 'count': len(data), 'results': data}, status=drf_status.HTTP_200_OK)

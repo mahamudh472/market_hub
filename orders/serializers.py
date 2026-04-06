@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderItem, Payment
+from .models import Order, OrderItem, Payment, PathaoCity, PathaoZone, PathaoArea
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -39,3 +39,25 @@ class SimpleOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'order_number', 'status', 'total', 'created_at']
+
+
+class PathaoCitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PathaoCity
+        fields = ['city_id', 'city_name']
+
+
+class PathaoZoneSerializer(serializers.ModelSerializer):
+    city_id = serializers.IntegerField(source='city.city_id', read_only=True)
+
+    class Meta:
+        model = PathaoZone
+        fields = ['zone_id', 'zone_name', 'city_id']
+
+
+class PathaoAreaSerializer(serializers.ModelSerializer):
+    zone_id = serializers.IntegerField(source='zone.zone_id', read_only=True)
+
+    class Meta:
+        model = PathaoArea
+        fields = ['area_id', 'area_name', 'zone_id', 'home_delivery_available', 'pickup_available']

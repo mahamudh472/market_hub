@@ -1,7 +1,18 @@
 
 from django.conf import settings
+from django.core.cache import cache
 import requests
 from orders.models import PathaoCity, PathaoZone, PathaoArea, PathaoSyncProgress
+
+
+def clear_pathao_location_cache():
+    cache.delete('pathao:cities:v1')
+
+    for city_id in PathaoCity.objects.values_list('city_id', flat=True):
+        cache.delete(f'pathao:zones:v1:{city_id}')
+
+    for zone_id in PathaoZone.objects.values_list('zone_id', flat=True):
+        cache.delete(f'pathao:areas:v1:{zone_id}')
 
 def get_access_token():
     base_url = settings.PATHAO_API_BASE_URL
@@ -116,6 +127,7 @@ def update_pathao_data():
 
         sync_progress.status = 'completed'
         sync_progress.save()
+        clear_pathao_location_cache()
         print("Pathao data updated successfully.")
     except Exception as e:
         print(f"Error updating Pathao data: {e}")

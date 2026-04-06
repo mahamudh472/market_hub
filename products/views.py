@@ -31,6 +31,7 @@ class CategoryProductListView(generics.ListAPIView):
     """Products filtered by a category slug (includes sub-categories)."""
     permission_classes = [permissions.AllowAny]
     serializer_class = SimpleProductSerializer
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         slug = self.kwargs['slug']
