@@ -83,3 +83,36 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         return SimpleOrderSerializer(orders, many=True).data
 
 
+class UserAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAddress
+        fields = [
+            'id',
+            'label',
+            'full_name',
+            'phone_number',
+            'address_line1',
+            'address_line2',
+            'city',
+            'zone',
+            'postal_code',
+            'country',
+            'is_default',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def validate(self, attrs):
+        city = attrs.get('city')
+        zone = attrs.get('zone')
+
+        # Prevent mismatched city/zone selections from being saved.
+        if city and zone and zone.city_id != city.city_id:
+            raise serializers.ValidationError({'zone': 'Selected zone does not belong to the selected city.'})
+
+        return attrs
+
+    def create(self, validated_data):
+        return UserAddress.objects.create(user=self.context['request'].user, **validated_data)
+
+

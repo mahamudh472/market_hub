@@ -19,6 +19,7 @@ urlpatterns = [
     path('change-password/', views.ChangePasswordView.as_view(), name='change_password'),
     path('customer/profile/', views.ProfileView.as_view(), name='profile'),
     path('customer/profile/update/', views.UpdateProfileView.as_view(), name='profile_update'),
+    path('customer/profile/address/', views.CustomerAddressCreateView.as_view(), name='customer_profile_add_address'),
     path('vendor/profile/', VendorProfileView.as_view(), name='profile'),
     path('vendor/profile/update/', VendorProfileView.as_view(), name='profile_update'),
 ]

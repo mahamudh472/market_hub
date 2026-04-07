@@ -10,11 +10,13 @@ from accounts.serializers import (
     UserSerializer, 
     CustomerProfileSerializer,
     VerifyEmailSerializer,
+    UserAddressSerializer,
     ChangePasswordSerializer
 )
 from rest_framework import status
 from .utils import send_otp_email, check_otp, use_otp
 from accounts.models import User
+from accounts.permissions import IsCustomerOwner
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -234,3 +236,22 @@ class LogoutView(GenericAPIView):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class CustomerAddressCreateView(GenericAPIView):
+    serializer_class = UserAddressSerializer
+    permission_classes = [IsAuthenticated, IsCustomerOwner]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            address = serializer.save()
+            return Response(self.serializer_class(address).data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        user = request.user
+        addresses = user.addresses.all()
+        serializer = self.serializer_class(addresses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
