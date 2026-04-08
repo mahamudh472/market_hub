@@ -16,6 +16,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 'detail': 'Account is not active. An OTP has been sent to your email for verification.',
             })
 
+        data['role'] = user.role
+        data['vendor_profile_status'] = None
+        data['vendor_last_submitted_at'] = None
+
+        if user.role == 'vendor':
+            vendor_profile = getattr(user, 'vendor_profile', None)
+            if vendor_profile:
+                data['vendor_profile_status'] = vendor_profile.verification_status
+                data['vendor_last_submitted_at'] = vendor_profile.last_submitted_at
+
         return data
 
 class RegisterSerializer(serializers.ModelSerializer):

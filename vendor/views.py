@@ -1,14 +1,35 @@
 from django.db.models import Count
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from django.utils import timezone
 
 from .models import VendorProfile
-from .serializers import VendorDetailSerializer
+from .serializers import (
+    VendorDetailSerializer,
+    VendorProfileSubmissionSerializer,
+    SimpleVendorProfileSerializer,
+)
 from products.models import Product, Category
 from products.serializers import SimpleProductSerializer, CategorySerializer
 from .paginations import StandardResultsSetPagination
 from accounts.permissions import IsVendorOwner
 from rest_framework.exceptions import NotFound
+
+
+def _pending_vendor_response(vendor: VendorProfile) -> Response:
+    return Response(
+        {
+            'message': 'Your vendor profile is not verified yet.',
+            'status': vendor.verification_status,
+            'last_submitted_at': vendor.last_submitted_at,
+            'can_resubmit': vendor.verification_status in {
+                VendorProfile.VerificationStatus.PENDING,
+                VendorProfile.VerificationStatus.REJECTED,
+            },
+            'blocked': vendor.verification_status == VendorProfile.VerificationStatus.BLOCKED,
+        },
+        status=status.HTTP_403_FORBIDDEN,
+    )
 
 
 class VendorProfileView(generics.RetrieveUpdateAPIView):
@@ -28,14 +49,69 @@ class VendorProfileView(generics.RetrieveUpdateAPIView):
             raise NotFound("Vendor profile not found for this user.")
 
 
+class VendorProfileSubmissionView(generics.UpdateAPIView):
+    """Submit or re-submit vendor profile data for admin verification."""
+    permission_classes = [permissions.IsAuthenticated, IsVendorOwner]
+    serializer_class = VendorProfileSubmissionSerializer
+
+    def get_object(self):
+        try:
+            return self.request.user.vendor_profile
+        except VendorProfile.DoesNotExist:
+            raise NotFound('Vendor profile not found for this user.')
+
+    def patch(self, request, *args, **kwargs):
+        vendor = self.get_object()
+
+        if vendor.verification_status == VendorProfile.VerificationStatus.BLOCKED:
+            return Response(
+                {
+                    'message': 'Your vendor profile is blocked. You cannot re-submit your information.',
+                    'status': vendor.verification_status,
+                    'last_submitted_at': vendor.last_submitted_at,
+                    'can_resubmit': False,
+                    'blocked': True,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        had_previous_submission = bool(vendor.last_submitted_at)
+        serializer = self.get_serializer(vendor, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            verification_status=VendorProfile.VerificationStatus.PENDING,
+            last_submitted_at=timezone.now(),
+        )
+
+        vendor.refresh_from_db()
+        return Response(
+            {
+                'message': (
+                    'Vendor profile re-submitted successfully. It is now pending admin review.'
+                    if had_previous_submission
+                    else 'Vendor profile submitted successfully. It is now pending admin review.'
+                ),
+                'status': vendor.verification_status,
+                'last_submitted_at': vendor.last_submitted_at,
+                'can_resubmit': True,
+                'blocked': False,
+                'vendor_profile': SimpleVendorProfileSerializer(vendor, context={'request': request}).data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
 class StoreListView(generics.ListAPIView):
     """
     List of all active stores. Returns basic info + avg rating.
     """
     permission_classes = [permissions.AllowAny]
-    serializer_class = VendorDetailSerializer
+    serializer_class = SimpleVendorProfileSerializer
     pagination_class = StandardResultsSetPagination
-    queryset = VendorProfile.objects.filter(is_active=True).order_by('-created_at')
+    queryset = VendorProfile.objects.filter(
+        is_active=True,
+        verification_status=VendorProfile.VerificationStatus.APPROVED,
+    ).order_by('-created_at')
 
 
 class StoreDetailView(generics.RetrieveAPIView):
@@ -46,7 +122,10 @@ class StoreDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = VendorDetailSerializer
     lookup_field = 'slug'
-    queryset = VendorProfile.objects.filter(is_active=True)
+    queryset = VendorProfile.objects.filter(
+        is_active=True,
+        verification_status=VendorProfile.VerificationStatus.APPROVED,
+    )
 
     def get_permissions(self):
         if self.kwargs.get('slug') is None:
@@ -57,7 +136,11 @@ class StoreDetailView(generics.RetrieveAPIView):
         slug = self.kwargs.get('slug')
         try:
             if slug:
-                return VendorProfile.objects.get(slug=slug, is_active=True)
+                return VendorProfile.objects.get(
+                    slug=slug,
+                    is_active=True,
+                    verification_status=VendorProfile.VerificationStatus.APPROVED,
+                )
             else:
                 # If no slug provided, return the vendor profile of the authenticated user
                 return self.request.user.vendor_profile
@@ -66,6 +149,11 @@ class StoreDetailView(generics.RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         vendor = self.get_object()
+
+        # /store/ means "my own vendor store". Keep it gated to approved profiles.
+        if self.kwargs.get('slug') is None and vendor.verification_status != VendorProfile.VerificationStatus.APPROVED:
+            return _pending_vendor_response(vendor)
+
         vendor_data = self.get_serializer(vendor).data
 
         # --- Products ---

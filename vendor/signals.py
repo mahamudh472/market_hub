@@ -39,6 +39,10 @@ def create_pathao_store_on_profile_complete(sender, instance: VendorProfile, cre
     if instance.profile_completed and instance.pathao_store_id:
         return
 
+    # Submission is reviewed by admin first; only approved profiles can provision a store.
+    if instance.verification_status != VendorProfile.VerificationStatus.APPROVED:
+        return
+
     # Only proceed if all required fields are filled in
     if not _has_required_fields(instance):
         return

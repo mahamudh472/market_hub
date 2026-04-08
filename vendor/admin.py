@@ -44,8 +44,18 @@ class VendorProfileForm(forms.ModelForm):
 @admin.register(VendorProfile)
 class VendorProfileAdmin(ModelAdmin):
     form = VendorProfileForm
-    list_display = ['name', 'user', 'city', 'is_verified', 'is_active', 'avg_rating', 'created_at']
-    list_filter = ['is_verified', 'is_active', 'country']
+    list_display = [
+        'name',
+        'user',
+        'city',
+        'verification_status',
+        'is_verified',
+        'is_active',
+        'last_submitted_at',
+        'avg_rating',
+        'created_at',
+    ]
+    list_filter = ['verification_status', 'is_verified', 'is_active', 'country']
     search_fields = ['name', 'user__email', 'city']
     raw_id_fields = ['user']
     list_fullwidth = True

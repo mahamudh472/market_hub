@@ -3,7 +3,7 @@ from . import views
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
-from vendor.views import VendorProfileView
+from vendor.views import VendorProfileView, VendorProfileSubmissionView
 
 
 urlpatterns = [
@@ -22,4 +22,5 @@ urlpatterns = [
     path('customer/profile/address/', views.CustomerAddressCreateView.as_view(), name='customer_profile_add_address'),
     path('vendor/profile/', VendorProfileView.as_view(), name='profile'),
     path('vendor/profile/update/', VendorProfileView.as_view(), name='profile_update'),
+    path('vendor/profile/submit/', VendorProfileSubmissionView.as_view(), name='profile_submit'),
 ]
