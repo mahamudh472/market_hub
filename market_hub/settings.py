@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     # Unfold must come before django.contrib.admin
     'unfold',
+    'daphne',
     'unfold.contrib.filters',
     'unfold.contrib.forms',
     'unfold.contrib.inlines',
@@ -61,6 +62,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'channels',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +77,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'market_hub.urls'
+ASGI_APPLICATION = 'market_hub.asgi.application'
 
 TEMPLATES = [
     {
@@ -91,6 +95,24 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'market_hub.wsgi.application'
+
+
+REDIS_URL = os.getenv('REDIS_URL')
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+            },
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 
 # Database
