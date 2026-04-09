@@ -106,10 +106,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps({'type': 'message', 'data': event['message']}))
+        await self.send(
+            text_data=json.dumps(
+                {'type': 'message', 'data': event['message']},
+                default=str,
+            )
+        )
 
     async def chat_read_receipt(self, event):
-        await self.send(text_data=json.dumps({'type': 'read_receipt', 'data': event}))
+        await self.send(
+            text_data=json.dumps(
+                {'type': 'read_receipt', 'data': event},
+                default=str,
+            )
+        )
 
     def _extract_token(self):
         query_string = self.scope.get('query_string', b'').decode('utf-8')
