@@ -7,6 +7,7 @@ urlpatterns = [
     path('categories/<slug:slug>/', views.CategoryProductListView.as_view(), name='category-products'),
 
     # Product listing / search
+    path('', views.PopularProductListView.as_view(), name='product-list'),
     path('search/', views.ProductSearchView.as_view(), name='product-search'),
 
     # Product detail

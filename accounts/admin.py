@@ -14,8 +14,8 @@ class UserAdmin(ModelAdmin):
 
 @admin.register(UserAddress)
 class UserAddressAdmin(ModelAdmin):
-    list_display = ['user', 'label', 'city', 'country', 'is_default']
-    list_filter = ['label', 'country', 'is_default']
+    list_display = ['user', 'label', 'city', 'country', 'is_default_delivery']
+    list_filter = ['label', 'country', 'is_default_delivery']
     search_fields = ['user__email', 'city']
     raw_id_fields = ['user']
 

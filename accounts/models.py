@@ -87,7 +87,7 @@ class UserAddress(models.Model):
     """Saved delivery addresses for a user"""
     ADDRESS_TYPES = [
         ('home', 'Home'),
-        ('work', 'Work'),
+        ('office', 'office'),
         ('other', 'Other'),
     ]
 
@@ -95,8 +95,8 @@ class UserAddress(models.Model):
     label = models.CharField(max_length=20, choices=ADDRESS_TYPES, default='home')
     full_name = models.CharField(max_length=150)
     phone_number = models.CharField(max_length=20)
-    address_line1 = models.CharField(max_length=255)
-    address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255)
+    landmark = models.CharField(max_length=255, blank=True, null=True)
     # Pathao-linked city & zone (used for delivery charge calculation)
     city = models.ForeignKey(
         'orders.PathaoCity',
@@ -110,14 +110,21 @@ class UserAddress(models.Model):
         null=True, blank=True,
         related_name='user_addresses',
     )
+    area = models.ForeignKey(
+        'orders.PathaoArea',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='user_addresses',
+    )
     postal_code = models.CharField(max_length=20, blank=True, null=True)
     country = models.CharField(max_length=100, default='Bangladesh')
-    is_default = models.BooleanField(default=False)
+    is_default_delivery = models.BooleanField(default=False)
+    is_default_billing = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'user_addresses'
-        ordering = ['-is_default', '-created_at']
+        ordering = ['-is_default_delivery', '-created_at']
 
     def __str__(self):
         city_name = self.city.city_name if self.city else 'N/A'
@@ -125,8 +132,8 @@ class UserAddress(models.Model):
 
     def save(self, *args, **kwargs):
         # Only one default address per user
-        if self.is_default:
-            UserAddress.objects.filter(user=self.user, is_default=True).exclude(pk=self.pk).update(is_default=False)
+        if self.is_default_delivery:
+            UserAddress.objects.filter(user=self.user, is_default_delivery=True).exclude(pk=self.pk).update(is_default_delivery=False)
         super().save(*args, **kwargs)
 
 

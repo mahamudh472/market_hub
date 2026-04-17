@@ -261,3 +261,46 @@ class PathaoAreaListView(APIView):
 
         data = _cached_list_response(cache_key, build_data)
         return Response({'zone_id': zone_id, 'count': len(data), 'results': data}, status=drf_status.HTTP_200_OK)
+
+import uuid, requests
+class SslCommerzPaymentView(generics.GenericAPIView):
+    """Test view to initiate a payment via SSLCommerz."""
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        tran_id = str(uuid.uuid4())
+        print(settings.SSLCOMMERZ_STORE_ID, settings.SSLCOMMERZ_STORE_PASSWORD)
+        print(settings.SSLCOMMERZ_API_URL)
+
+        base_url = request.build_absolute_uri('/')[:-1] + '/api/v1' 
+
+        payload = {
+            "store_id": settings.SSLCOMMERZ_STORE_ID,
+            "store_passwd": settings.SSLCOMMERZ_STORE_PASSWORD,
+
+            "total_amount": 100,
+            "currency": "BDT",
+            "tran_id": tran_id,
+
+            "success_url": f"{base_url}/orders/payment/success/",
+            "fail_url": f"{base_url}/orders/payment/fail/",
+            "cancel_url": f"{base_url}/orders/payment/cancel/",
+            "ipn_url": f"{base_url}/orders/payment/ipn/",
+
+            "cus_name": "Test User",
+            "cus_email": "test@mail.com",
+            "cus_add1": "Dhaka",
+            "cus_phone": "01700000000",
+
+            "product_name": "Test Product",
+            "product_category": "General",
+            "product_profile": "general",
+        }
+
+        response = requests.post(settings.SSLCOMMERZ_API_URL, data=payload)
+        data = response.json()
+
+        if data.get("status") == "SUCCESS":
+            return Response({"url": data["GatewayPageURL"]})
+
+        return Response({"error": data}, status=400)

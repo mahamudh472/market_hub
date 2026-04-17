@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from accounts.serializers import (
     CustomTokenObtainPairSerializer, 
     ResetPasswordConfirmSerializer,
@@ -238,20 +238,21 @@ class LogoutView(GenericAPIView):
             )
 
 
-class CustomerAddressCreateView(GenericAPIView):
+class CustomerAddressCreateView(ListCreateAPIView):
     serializer_class = UserAddressSerializer
     permission_classes = [IsAuthenticated, IsCustomerOwner]
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            address = serializer.save()
-            return Response(self.serializer_class(address).data, status=status.HTTP_201_CREATED)
+    # def post(self, request):
+    #     serializer_class = self.serializer_class
+    #     if not serializer_class:
+    #         return Response({"error": "Serializer class not defined"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #     serializer = serializer_class(data=request.data, context={'request': request})
+    #     if serializer.is_valid():
+    #         address = serializer.save()
+    #         return Response(serializer_class(address).data, status=status.HTTP_201_CREATED)
+    #
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request):
-        user = request.user
-        addresses = user.addresses.all()
-        serializer = self.serializer_class(addresses, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        return self.request.user.addresses.all()

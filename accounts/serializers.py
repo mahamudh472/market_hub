@@ -101,13 +101,15 @@ class UserAddressSerializer(serializers.ModelSerializer):
             'label',
             'full_name',
             'phone_number',
-            'address_line1',
-            'address_line2',
+            'address',
+            'landmark',
             'city',
             'zone',
+            'area',
             'postal_code',
             'country',
-            'is_default',
+            'is_default_delivery',
+            'is_default_billing',
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']

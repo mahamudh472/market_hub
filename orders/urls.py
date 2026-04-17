@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .utils.ssl_commerz_util import payment_success, payment_fail, payment_cancel, payment_ipn
 
 urlpatterns = [
     path('', views.OrderListView.as_view(), name='order-list'),
@@ -11,4 +12,10 @@ urlpatterns = [
     path('get-stores/', views.GetStoresView.as_view(), name='get-stores'),
     path('create-store/', views.CreateStoreView.as_view(), name='create-store'),
     path('calculate-delivery-charge/', views.CalculateDeliveryChargeView.as_view(), name='calculate-delivery-charge'),
+
+    path('payment/', views.SslCommerzPaymentView.as_view(), name='payment'),
+    path("payment/success/", payment_success),
+    path("payment/fail/", payment_fail),
+    path("payment/cancel/", payment_cancel),
+    path("payment/ipn/", payment_ipn),
 ]

@@ -69,6 +69,19 @@ class CategoryProductListView(generics.ListAPIView):
 
         return qs
 
+class PopularProductListView(generics.ListAPIView):
+    """Top 10 popular products based on review count."""
+    permission_classes = [permissions.AllowAny]
+    serializer_class = SimpleProductSerializer
+
+    def get_queryset(self):
+        return (
+            Product.objects
+            .annotate(review_count=Count('reviews'))
+            .order_by('-review_count', '-created_at')[:10]
+            .select_related('vendor', 'category')
+            .prefetch_related('images', 'reviews')
+        )
 
 class ProductSearchView(generics.ListAPIView):
     """Full-text product search via ?q=<query>"""
