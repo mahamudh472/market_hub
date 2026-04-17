@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderItem, Payment, PathaoCity, PathaoZone, PathaoArea
+from .models import Order, OrderItem, Payment, SubOrder, PathaoCity, PathaoZone, PathaoArea
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -22,16 +22,39 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     payment = PaymentSerializer(read_only=True)
+    sub_orders = serializers.SerializerMethodField()
+
+    def get_sub_orders(self, obj):
+        queryset = obj.sub_orders.prefetch_related('items').all().order_by('created_at')
+        return SubOrderSerializer(queryset, many=True).data
 
     class Meta:
         model = Order
         fields = [
             'id', 'order_number', 'status',
             'subtotal', 'voucher_code', 'voucher_discount',
-            'tax', 'delivery_charge', 'total',
+            'tax', 'delivery_charge', 'platform_fee', 'cod_charge', 'total',
             'delivery_address_snapshot',
             'note',
+            'sub_orders',
             'items', 'payment',
+            'created_at', 'updated_at',
+        ]
+
+
+class SubOrderSerializer(serializers.ModelSerializer):
+    vendor_id = serializers.IntegerField(source='vendor.id', read_only=True)
+    vendor_name = serializers.CharField(source='vendor.name', read_only=True)
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = SubOrder
+        fields = [
+            'id',
+            'vendor_id', 'vendor_name',
+            'status',
+            'subtotal', 'voucher_discount', 'tax', 'delivery_charge', 'platform_fee', 'total',
+            'items',
             'created_at', 'updated_at',
         ]
 
@@ -61,3 +84,13 @@ class PathaoAreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = PathaoArea
         fields = ['area_id', 'area_name', 'zone_id', 'home_delivery_available', 'pickup_available']
+
+
+class CheckoutSerializer(serializers.Serializer):
+    PAYMENT_TYPE_CHOICES = [
+        ('cod', 'Cash on Delivery'),
+        ('paynow', 'Pay Now'),
+    ]
+
+    address_id = serializers.IntegerField()
+    payment_type = serializers.ChoiceField(choices=PAYMENT_TYPE_CHOICES)

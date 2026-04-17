@@ -249,6 +249,11 @@ UNFOLD = {
                         "icon": "dashboard",
                         "link": reverse_lazy("admin:index"),
                     },
+                    {
+                        "title": _("Site Settings"),
+                        "icon": "settings",
+                        "link": reverse_lazy("admin:orders_sitesettings_changelist"),
+                    },
                 ],
             },
             {
@@ -292,6 +297,11 @@ UNFOLD = {
                         "title": _("Payments"),
                         "icon": "payments",
                         "link": reverse_lazy("admin:orders_payment_changelist"),
+                    },
+                    {
+                        "title": _("Sub Orders"),
+                        "icon": "account_tree",
+                        "link": reverse_lazy("admin:orders_suborder_changelist"),
                     },
                     {
                         "title": _("Carts"),
@@ -358,6 +368,33 @@ UNFOLD = {
                         "title": _("Wishlists"),
                         "icon": "favorite",
                         "link": reverse_lazy("admin:main_wishlist_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Delivery & Logistics"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Pathao Cities"),
+                        "icon": "location_city",
+                        "link": reverse_lazy("admin:orders_pathaocity_changelist"),
+                    },
+                    {
+                        "title": _("Pathao Zones"),
+                        "icon": "map",
+                        "link": reverse_lazy("admin:orders_pathaozone_changelist"),
+                    },
+                    {
+                        "title": _("Pathao Areas"),
+                        "icon": "place",
+                        "link": reverse_lazy("admin:orders_pathaoarea_changelist"),
+                    },
+                    {
+                        "title": _("Sync Progress"),
+                        "icon": "sync",
+                        "link": reverse_lazy("admin:orders_pathaosyncprogress_changelist"),
                     },
                 ],
             },

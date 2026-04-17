@@ -2,6 +2,34 @@ import uuid
 from django.db import models
 
 
+class SiteSettings(models.Model):
+    """Global commerce settings used during checkout calculations."""
+
+    cod_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax_percent = models.DecimalField(max_digits=5, decimal_places=2, default=5)
+    platform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    default_delivery_charge = models.DecimalField(max_digits=10, decimal_places=2, default=60)
+    free_delivery_min_order = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    is_cod_enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'site_settings'
+        verbose_name = 'Site Settings'
+        verbose_name_plural = 'Site Settings'
+
+    def __str__(self):
+        return 'Site Settings'
+
+    @classmethod
+    def get_solo(cls):
+        settings_obj = cls.objects.order_by('id').first()
+        if settings_obj:
+            return settings_obj
+        return cls.objects.create()
+
+
 class Order(models.Model):
     """Customer order header"""
     STATUS_CHOICES = [
@@ -31,6 +59,8 @@ class Order(models.Model):
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     delivery_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    platform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    cod_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -67,6 +97,10 @@ class OrderItem(models.Model):
     ]
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    sub_order = models.ForeignKey(
+        'SubOrder', on_delete=models.CASCADE,
+        related_name='items', null=True, blank=True,
+    )
     vendor = models.ForeignKey('vendor.VendorProfile', on_delete=models.PROTECT, related_name='order_items')
     product = models.ForeignKey('products.Product', on_delete=models.PROTECT, related_name='order_items')
     variant = models.ForeignKey(
@@ -88,6 +122,35 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.order.order_number} — {self.product_name} × {self.quantity}"
+
+
+class SubOrder(models.Model):
+    """Vendor-specific child order under a parent order."""
+
+    STATUS_CHOICES = Order.STATUS_CHOICES
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    parent_order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='sub_orders')
+    vendor = models.ForeignKey('vendor.VendorProfile', on_delete=models.PROTECT, related_name='sub_orders')
+
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    voucher_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    delivery_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    platform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    note = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'sub_orders'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.parent_order.order_number} — {self.vendor.name}"
 
 
 class Payment(models.Model):
