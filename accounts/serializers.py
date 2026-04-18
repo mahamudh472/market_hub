@@ -31,7 +31,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'role', 'email', 'password']
+        fields = ['id', 'full_name', 'role', 'email', 'password', 'phone_number']
 
     def validate_role(self, value):
         if value not in ['customer', 'vendor']:
@@ -43,7 +43,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             email=validated_data['email'],
             full_name=validated_data.get('full_name', ''),
-            role=validated_data.get('role', 'customer')
+            role=validated_data.get('role', 'customer'),
+            phone_number=validated_data.get('phone_number', '')
         )
         user.set_password(validated_data['password'])
         user.is_active = False  # User will be activated after email verification
