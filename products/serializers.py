@@ -149,6 +149,65 @@ class SimpleProductSerializer(serializers.ModelSerializer):
 
 
 # ─────────────────────────────────────────
+# Vendor dashboard – product list table
+# ─────────────────────────────────────────
+class VendorProductListSerializer(serializers.ModelSerializer):
+    """Lean serializer for the vendor dashboard product list table.
+
+    Columns:
+        product      – name + thumbnail URL
+        category     – category name
+        price        – base price
+        variant_count – number of variants (0 → displayed as 'No variants')
+        variant_label – human-friendly string shown in the UI
+        stock        – total stock (base product stock)
+        status       – 'In Stock' | 'Out of Stock'
+    """
+
+    thumbnail = serializers.SerializerMethodField()
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    variant_count = serializers.SerializerMethodField()
+    variant_label = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'thumbnail',
+            'category_name',
+            'price',
+            'variant_count',
+            'variant_label',
+            'stock',
+            'status',
+            'created_at',
+        ]
+
+    def get_thumbnail(self, obj):
+        request = self.context.get('request')
+        img_obj = obj.images.filter(thumbnail=True).first() or obj.images.first()
+        if img_obj:
+            url = img_obj.image.url
+            return request.build_absolute_uri(url) if request else url
+        return None
+
+    def get_variant_count(self, obj):
+        # Use the annotated value when available (avoids extra query per row)
+        return getattr(obj, 'variant_count_annotated', obj.variants.count())
+
+    def get_variant_label(self, obj):
+        count = self.get_variant_count(obj)
+        if count == 0:
+            return 'No variants'
+        return f'{count} variant{"s" if count != 1 else ""}'
+
+    def get_status(self, obj):
+        return 'In Stock' if obj.stock > 0 else 'Out of Stock'
+
+
+# ─────────────────────────────────────────
 # Full Product detail
 # ─────────────────────────────────────────
 class ProductSerializer(serializers.ModelSerializer):

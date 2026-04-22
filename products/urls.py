@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     # Categories
     path('categories/', views.CategoryListView.as_view(), name='category-list'),
+    path('categories/simple/', views.CategorySimpleListView.as_view(), name='category-simple-list'),
     path('categories/<slug:slug>/', views.CategoryProductListView.as_view(), name='category-products'),
 
     # Product listing / search

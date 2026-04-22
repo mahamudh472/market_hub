@@ -8,6 +8,7 @@ from .serializers import (
     SimpleProductSerializer,
     CategorySerializer,
     ProductReviewSerializer,
+    VendorProductListSerializer,
 )
 from .paginations import DefaultPagination
 from rest_framework import status
@@ -213,3 +214,102 @@ class ProductReviewCreateView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
+
+class VendorProductListView(generics.ListAPIView):
+    """
+    GET /vendor/products/
+
+    Returns the authenticated vendor's products with pagination, search, and
+    category filter.
+
+    Query params:
+        search    (str) – filters on name, description, and category name
+        category  (int) – category primary key
+        page      (int) – page number (default 1)
+        page_size (int) – items per page (default 10, max 100)
+
+    The response includes a top-level `categories` key listing every distinct
+    category that the vendor has products in (useful for the filter dropdown).
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = VendorProductListSerializer
+    pagination_class = DefaultPagination
+
+    def _get_vendor(self):
+        try:
+            return self.request.user.vendor_profile
+        except Exception:
+            return None
+
+    def get_queryset(self):
+        vendor = self._get_vendor()
+        if vendor is None:
+            return Product.objects.none()
+
+        qs = (
+            Product.objects
+            .filter(vendor=vendor)
+            .select_related('category')
+            .prefetch_related('images', 'variants')
+            .annotate(variant_count_annotated=Count('variants', distinct=True))
+            .order_by('-created_at')
+        )
+
+        # --- search ---
+        search = self.request.query_params.get('search', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(name__icontains=search) |
+                Q(description__icontains=search) |
+                Q(category__name__icontains=search)
+            )
+
+        # --- category filter ---
+        category_id = self.request.query_params.get('category', '').strip()
+        if category_id:
+            qs = qs.filter(category_id=category_id)
+
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        # Inject distinct categories for this vendor's products (unfiltered)
+        vendor = self._get_vendor()
+        if vendor is not None:
+            categories = (
+                Category.objects
+                .filter(products__vendor=vendor)
+                .distinct()
+                .order_by('name')
+                .values('id', 'name')
+            )
+            response.data['categories'] = list(categories)
+        else:
+            response.data['categories'] = []
+
+        return response
+
+
+# ─────────────────────────────────────────
+# Plain category list (public)
+# ─────────────────────────────────────────
+class CategorySimpleListView(generics.ListAPIView):
+    """
+    GET /products/categories/simple/
+
+    Returns all categories that have at least one product, as a flat list of
+    {id, name} objects — suitable for filter dropdowns.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def list(self, request, *args, **kwargs):
+        categories = (
+            Category.objects
+            .filter(products__isnull=False)
+            .distinct()
+            .order_by('name')
+            .values('id', 'name')
+        )
+        return Response(list(categories))
