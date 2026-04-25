@@ -8,6 +8,7 @@ from .serializers import (
     VendorDetailSerializer,
     VendorProfileSubmissionSerializer,
     SimpleVendorProfileSerializer,
+    ProductCreateSerializer,
 )
 from products.models import Product, Category
 from products.serializers import SimpleProductSerializer, CategorySerializer
@@ -194,3 +195,23 @@ class StoreDetailView(generics.RetrieveAPIView):
             'categories': categories_data,
             'products': products_data,
         })
+
+class VendorCreateProductView(generics.CreateAPIView):
+    """
+    Endpoint for vendors to create new products.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsVendorOwner]
+    serializer_class = ProductCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = ProductCreateSerializer(
+            data=request.data,
+            context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(vendor=request.user.vendor_profile)
+        return Response(
+            {"message": "Product created successfully."},
+            status=status.HTTP_201_CREATED
+        )
+

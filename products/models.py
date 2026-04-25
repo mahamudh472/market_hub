@@ -18,7 +18,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     stock = models.PositiveIntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
 

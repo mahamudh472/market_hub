@@ -9,4 +9,6 @@ urlpatterns = [
 
     # Vendor's own product list (paginated + search + category filter)
     path('products/', VendorProductListView.as_view(), name='vendor-products'),
+    path('products/create/', views.VendorCreateProductView.as_view(), name='vendor-product-create'),
+
 ]
