@@ -69,13 +69,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'market_hub.urls'
@@ -426,7 +426,7 @@ def environment_callback(request):
 
 # ─────────────────────────────────────────────────────────
 # CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -438,6 +438,13 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'ngrok-skip-browser-warning',
+]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'https://sisterlike-tastelessly-mike.ngrok-free.dev',
+    'https://observant-pebble-diary.ngrok-free.dev',
+    'https://multi-vendor-website-seven.vercel.app',
 ]
 
 # Pathao API Configuration
