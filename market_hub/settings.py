@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-e7iz@(00au76(vdf40adk+@dbtl_wvgf@=zbh+u2szp(z1zu68
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://sisterlike-tastelessly-mike.ngrok-free.dev', 'https://observant-pebble-diary.ngrok-free.dev']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://sisterlike-tastelessly-mike.ngrok-free.dev', 'https://observant-pebble-diary.ngrok-free.dev', 'https://multi-vendor-website-seven.vercel.app']
 
 
 # Application definition
