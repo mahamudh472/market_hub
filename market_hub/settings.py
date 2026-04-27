@@ -441,33 +441,6 @@ def environment_callback(request):
     return [_("Production"), "danger"]
 
 
-<<<<<<< HEAD
-# ─────────────────────────────────────────────────────────
-# CORS Configuration
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'ngrok-skip-browser-warning',
-]
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://sisterlike-tastelessly-mike.ngrok-free.dev',
-    'https://observant-pebble-diary.ngrok-free.dev',
-    'https://multi-vendor-website-seven.vercel.app',
-    'http://localhost:5173'
-]
-=======
->>>>>>> bb66452 (settings secrets and necessary fields moved to env)
-
 # Pathao API Configuration
 PATHAO_CLIENT_ID = os.getenv('PATHAO_CLIENT_ID')
 PATHAO_CLIENT_SECRET = os.getenv('PATHAO_CLIENT_SECRET')
