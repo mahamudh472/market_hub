@@ -34,8 +34,8 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://sisterlike-tastelessly
 
 # ─────────────────────────────────────────────────────────
 # CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', False) == False
-CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', True) == True
+CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False').lower() == 'true'
+CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'True').lower() == 'true'
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -48,7 +48,8 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
     'ngrok-skip-browser-warning',
 ]
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+_default_cors_origins = 'http://localhost:5173,https://observant-pebble-diary.ngrok-free.dev,https://multi-vendor-website-seven.vercel.app'
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', _default_cors_origins).split(',')
 
 # Application definition
 
