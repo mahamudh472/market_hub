@@ -24,14 +24,31 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e7iz@(00au76(vdf40adk+@dbtl_wvgf@=zbh+u2szp(z1zu68'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', True) == True
 
-ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://sisterlike-tastelessly-mike.ngrok-free.dev', 'https://observant-pebble-diary.ngrok-free.dev', 'https://multi-vendor-website-seven.vercel.app', 'http://localhost:5173']
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://sisterlike-tastelessly-mike.ngrok-free.dev', 'https://observant-pebble-diary.ngrok-free.dev', 'https://multi-vendor-website-seven.vercel.app']
 
+# ─────────────────────────────────────────────────────────
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', False) == False
+CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', True) == True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'ngrok-skip-browser-warning',
+]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
 
 # Application definition
 
@@ -424,6 +441,7 @@ def environment_callback(request):
     return [_("Production"), "danger"]
 
 
+<<<<<<< HEAD
 # ─────────────────────────────────────────────────────────
 # CORS Configuration
 # CORS_ALLOW_ALL_ORIGINS = True
@@ -447,6 +465,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://multi-vendor-website-seven.vercel.app',
     'http://localhost:5173'
 ]
+=======
+>>>>>>> bb66452 (settings secrets and necessary fields moved to env)
 
 # Pathao API Configuration
 PATHAO_CLIENT_ID = os.getenv('PATHAO_CLIENT_ID')
