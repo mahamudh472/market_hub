@@ -34,8 +34,8 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://sisterlike-tastelessly
 
 # ─────────────────────────────────────────────────────────
 # CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False').lower() == 'true'
-CORS_ALLOW_CREDENTIALS = os.getenv('CORS_ALLOW_CREDENTIALS', 'True').lower() == 'true'
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
