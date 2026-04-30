@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', True) == True
+DEBUG = os.getenv('DJANGO_DEBUG', "True") == "True"
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173', 'https://sisterlike-tastelessly-mike.ngrok-free.dev', 'https://observant-pebble-diary.ngrok-free.dev', 'https://multi-vendor-website-seven.vercel.app']
@@ -69,20 +69,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'accounts',
-    'admin_dashboard',
-    'main',
-    'vendor',
-    'products',
-    'cart',
-    'orders',
+    'apps.accounts',
+    'apps.admin_dashboard',
+    'apps.main',
+    'apps.vendor',
+    'apps.products',
+    'apps.cart',
+    'apps.orders',
+    'apps.chat',
 
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'channels',
-    'chat',
 ]
 
 MIDDLEWARE = [
