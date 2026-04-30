@@ -11,7 +11,6 @@ from .models import (
 class CategoryAdmin(ModelAdmin):
     list_display = ['name', 'slug', 'parent']
     search_fields = ['name']
-    prepopulated_fields = {'slug': ('name',)}
 
 
 class ProductImageInline(TabularInline):
