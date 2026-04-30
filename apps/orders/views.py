@@ -136,8 +136,8 @@ class CheckoutView(generics.GenericAPIView):
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
-        from accounts.models import UserAddress
-        from cart.models import Cart, VoucherUsage
+        from apps.accounts.models import UserAddress
+        from apps.cart.models import Cart, VoucherUsage
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -426,8 +426,8 @@ class CalculateDeliveryChargeView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        from vendor.models import VendorProfile
-        from accounts.models import UserAddress
+        from apps.vendor.models import VendorProfile
+        from apps.accounts.models import UserAddress
 
         vendor_id = request.data.get('vendor_id')
         address_id = request.data.get('address_id')

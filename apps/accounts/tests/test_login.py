@@ -2,8 +2,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import Role, User
-from vendor.models import VendorProfile
+from apps.accounts.models import Role, User
+from apps.vendor.models import VendorProfile
 
 
 class LoginAPITest(APITestCase):

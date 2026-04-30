@@ -75,12 +75,12 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory
 from unittest.mock import patch, MagicMock
 
-from products.models import (
+from apps.products.models import (
     Product, ProductVariantType,
     ProductVariantOption, ProductVariant, Category
 )
 from .serializers import ProductCreateSerializer
-from vendor.models import VendorProfile
+from apps.vendor.models import VendorProfile
 
 User = get_user_model()
 

@@ -203,6 +203,7 @@ class Command(BaseCommand):
 
         self._ensure_delivery_charges()
         self._ensure_vouchers()
+        self._check_pathao_data()
         categories = self._ensure_categories()
 
         users = self._create_users(n_users)
@@ -300,6 +301,20 @@ class Command(BaseCommand):
         return all_leaf_categories
 
     # ------------------------------------------------------------------
+    # Pathao Data Check
+    # ------------------------------------------------------------------
+
+    def _check_pathao_data(self):
+        from apps.orders.models import PathaoCity
+        if not PathaoCity.objects.exists():
+            self.stdout.write(self.style.WARNING(
+                "Warning: No Pathao location data found in database. "
+                "Addresses might be created without city/zone/area."
+            ))
+        else:
+            self.stdout.write(f"  Found {PathaoCity.objects.count()} Pathao cities.")
+
+    # ------------------------------------------------------------------
     # Users
     # ------------------------------------------------------------------
 
@@ -325,18 +340,26 @@ class Command(BaseCommand):
             )
 
             # Add 1-2 addresses
+            from apps.orders.models import PathaoCity, PathaoZone, PathaoArea
             for i in range(random.randint(1, 2)):
+                # Get a random area that has a zone and city
+                area = PathaoArea.objects.select_related('zone', 'zone__city').order_by("?").first()
+                zone = area.zone if area else None
+                city = zone.city if zone else None
+
                 UserAddress.objects.create(
                     user=user,
-                    label=random.choice(["home", "work", "other"]),
+                    label=random.choice(["home", "office", "other"]),
                     full_name=user.full_name,
                     phone_number=rand_phone(),
-                    address_line1=f"{random.randint(1, 999)}, {rand_str(5).capitalize()} Street",
-                    city=random.choice(CITIES),
-                    state=random.choice(CITIES),
+                    address=f"{random.randint(1, 999)}, {rand_str(5).capitalize()} Street",
+                    city=city,
+                    zone=zone,
+                    area=area,
                     postal_code=str(random.randint(1000, 9999)),
                     country=random.choice(COUNTRIES),
-                    is_default=(i == 0),
+                    is_default_delivery=(i == 0),
+                    is_default_billing=(i == 0),
                 )
 
             created_users.append(user)
@@ -372,6 +395,11 @@ class Command(BaseCommand):
                 password=make_password("vendorpass123"),
             )
 
+            from apps.orders.models import PathaoArea
+            area = PathaoArea.objects.select_related('zone', 'zone__city').order_by("?").first()
+            zone = area.zone if area else None
+            city = zone.city if zone else None
+
             vendor_name = f"{random.choice(VENDOR_NAMES)} {rand_str(3).upper()}"
             vendor = VendorProfile.objects.create(
                 user=user,
@@ -379,10 +407,14 @@ class Command(BaseCommand):
                 description=f"Quality products from {vendor_name}.",
                 contact_email=email,
                 contact_phone=rand_phone(),
+                secondary_phone=rand_phone(),
+                otp_number=rand_phone(),
                 address=f"{random.randint(1, 200)}, Commerce Road",
-                city=random.choice(CITIES),
+                city=city,
+                zone=zone,
+                area=area,
                 country=random.choice(COUNTRIES),
-                is_verified=random.choice([True, False]),
+                verification_status=random.choice(VendorProfile.VerificationStatus.values),
                 is_active=True,
                 avg_rating=Decimal(str(round(random.uniform(3.0, 5.0), 2))),
                 total_reviews=random.randint(0, 200),
@@ -601,8 +633,10 @@ class Command(BaseCommand):
                 delivery_snapshot = {
                     "full_name": address.full_name,
                     "phone_number": address.phone_number,
-                    "address_line1": address.address_line1,
-                    "city": address.city,
+                    "address": address.address,
+                    "city": address.city.city_name if address.city else None,
+                    "zone": address.zone.zone_name if address.zone else None,
+                    "area": address.area.area_name if address.area else None,
                     "country": address.country,
                     "postal_code": address.postal_code,
                 }

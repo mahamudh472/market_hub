@@ -48,7 +48,7 @@ def create_pathao_store_on_profile_complete(sender, instance: VendorProfile, cre
         return
 
     try:
-        from orders.utils.pathao_util import get_access_token, create_store
+        from apps.orders.utils.pathao_util import get_access_token, create_store
 
         access_token = get_access_token()
 

@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.models import Role, User, UserAddress
-from orders.models import PathaoCity, PathaoZone
+from apps.orders.models import PathaoCity, PathaoZone
 
 
 class CustomerAddressCreateAPITest(APITestCase):
