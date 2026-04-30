@@ -30,12 +30,12 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.getenv('DJANGO_DEBUG', True) == True
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://sisterlike-tastelessly-mike.ngrok-free.dev', 'https://observant-pebble-diary.ngrok-free.dev', 'https://multi-vendor-website-seven.vercel.app']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173', 'https://sisterlike-tastelessly-mike.ngrok-free.dev', 'https://observant-pebble-diary.ngrok-free.dev', 'https://multi-vendor-website-seven.vercel.app']
 
 # ─────────────────────────────────────────────────────────
 # CORS Configuration
-# CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
