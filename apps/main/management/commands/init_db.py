@@ -232,7 +232,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _ensure_delivery_charges(self):
-        from main.models import DeliveryCharge
+        from apps.main.models import DeliveryCharge
 
         created = 0
         for name, desc, charge, min_amount in DELIVERY_CHARGE_DATA:
@@ -255,7 +255,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _ensure_vouchers(self):
-        from cart.models import Voucher
+        from apps.cart.models import Voucher
 
         created = 0
         now = timezone.now()
@@ -285,7 +285,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _ensure_categories(self):
-        from products.models import Category
+        from apps.products.models import Category
 
         all_leaf_categories = []
         for parent_name, children in CATEGORY_DATA:
@@ -304,7 +304,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _create_users(self, count):
-        from accounts.models import User, UserAddress
+        from apps.accounts.models import User, UserAddress
 
         created_users = []
         for _ in range(count):
@@ -345,7 +345,7 @@ class Command(BaseCommand):
         return created_users
 
     def _get_existing_users(self):
-        from accounts.models import User
+        from apps.accounts.models import User
         return list(User.objects.filter(is_staff=False, vendor_profile__isnull=True))
 
     # ------------------------------------------------------------------
@@ -353,8 +353,8 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _create_vendors(self, count):
-        from accounts.models import User
-        from vendor.models import VendorProfile
+        from apps.accounts.models import User
+        from apps.vendor.models import VendorProfile
 
         created_vendors = []
         for _ in range(count):
@@ -393,7 +393,7 @@ class Command(BaseCommand):
         return created_vendors
 
     def _get_all_vendors(self):
-        from vendor.models import VendorProfile
+        from apps.vendor.models import VendorProfile
         return VendorProfile.objects.filter(is_active=True)
 
     # ------------------------------------------------------------------
@@ -401,7 +401,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _create_products(self, count, vendors, categories):
-        from products.models import (
+        from apps.products.models import (
             Product, ProductVariant, ProductVariantOption, ProductVariantType,
         )
 
@@ -478,7 +478,7 @@ class Command(BaseCommand):
         return created
 
     def _get_all_products(self):
-        from products.models import Product
+        from apps.products.models import Product
         return list(Product.objects.all())
 
     # ------------------------------------------------------------------
@@ -486,7 +486,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _add_reviews(self, products, users):
-        from products.models import ProductReview
+        from apps.products.models import ProductReview
 
         if not users:
             return
@@ -513,7 +513,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _add_cart_items(self, products, users):
-        from cart.models import Cart, CartItem
+        from apps.cart.models import Cart, CartItem
 
         if not users:
             return
@@ -541,7 +541,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _add_wishlist_items(self, products, users):
-        from main.models import Wishlist
+        from apps.main.models import Wishlist
 
         if not users:
             return
@@ -562,9 +562,9 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def _create_orders(self, count, users, products, vendors):
-        from accounts.models import UserAddress
-        from cart.models import Voucher
-        from orders.models import Order, OrderItem, Payment
+        from apps.accounts.models import UserAddress
+        from apps.cart.models import Voucher
+        from apps.orders.models import Order, OrderItem, Payment
 
         vouchers = list(Voucher.objects.filter(is_active=True))
         created = 0

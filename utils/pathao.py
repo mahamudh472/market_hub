@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.core.cache import cache
 import requests
-from orders.models import PathaoCity, PathaoZone, PathaoArea, PathaoSyncProgress
+from apps.orders.models import PathaoCity, PathaoZone, PathaoArea, PathaoSyncProgress
 
 
 def clear_pathao_location_cache():
