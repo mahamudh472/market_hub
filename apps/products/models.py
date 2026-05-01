@@ -36,6 +36,13 @@ class Product(models.Model):
             discount_amount = (1 - self.discount / 100) * self.price
             return discount_amount
         return self.price
+    @property
+    def thumbnail(self):
+        if self.images.filter(thumbnail=True).exists():
+            return self.images.filter(thumbnail=True).first().image.url
+        elif self.images.exists():
+            return self.images.first().image.url
+        return None
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')

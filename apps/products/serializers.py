@@ -248,3 +248,9 @@ class ProductSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.wishlisted_by.filter(user=request.user).exists()
         return False
+
+# class ReceivedProductSerializer(serializers.ModelSerializer):
+#     reviews_count = serializers.IntegerField(source='reviews.count', read_only=True)
+#     class Meta:
+#         model = Product
+#         fields = ['id', 'name', 'price', 'discount', 'discounted_price', 'thumbnail', "reviews_count"]

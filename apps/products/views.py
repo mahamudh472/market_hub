@@ -313,3 +313,19 @@ class CategorySimpleListView(generics.ListAPIView):
             .values('id', 'name')
         )
         return Response(list(categories))
+
+# class ReceviedProductListView(generics.ListAPIView):
+#     """Products received by the authenticated vendor (i.e. orders that have been delivered to them)."""
+#     permission_classes = [permissions.IsAuthenticated]
+#     serializer_class = SimpleProductSerializer
+#     pagination_class = DefaultPagination
+#
+#     def get_queryset(self):
+#         vendor = self.request.user.vendor_profile
+#         return (
+#             Product.objects
+#             .filter(orders__vendor=vendor, orders__status='delivered')
+#             .select_related('vendor', 'category')
+#             .prefetch_related('images', 'reviews')
+#             .distinct()
+#         )

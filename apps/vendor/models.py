@@ -43,6 +43,8 @@ class VendorProfile(models.Model):
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
+    recommended = models.BooleanField(default=False)  
+
     profile_completed = models.BooleanField(default=False)  # Set to True when all required fields are filled
 
     # Aggregate rating (updated via signal/task)
