@@ -15,17 +15,21 @@ from rest_framework import status
 
 
 class CategoryListView(generics.ListAPIView):
-    """All active top-level categories with product counts."""
+    """All top-level categories with nested subcategories + product counts."""
     permission_classes = [permissions.AllowAny]
     serializer_class = CategorySerializer
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
-        return (
-            Category.objects
-            .filter(parent__isnull=True)
-            .annotate(product_count=Count('products'))
-            .order_by('name')
-        )
+        categories = Category.objects.filter(parent__isnull=True).order_by('name')
+
+        for category in categories:
+            sub_ids = Category.objects.filter(parent=category).values_list('id', flat=True)
+            category.product_count = Product.objects.filter(
+                Q(category=category) | Q(category__in=sub_ids)
+            ).distinct().count()
+
+        return categories
 
 
 class CategoryProductListView(generics.ListAPIView):

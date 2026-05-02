@@ -6,7 +6,7 @@ import uuid
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = AutoSlugField(populate_from="name", unique=True, always_update=False)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subcategories')
     image = models.ImageField(upload_to='category_images/', null=True, blank=True)
 
     def __str__(self):
