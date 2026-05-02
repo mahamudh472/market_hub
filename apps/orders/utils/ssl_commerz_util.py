@@ -63,6 +63,7 @@ def payment_ipn(request):
         tran_id = request.POST.get("tran_id")
 
         validation_data = validate_payment(val_id)
+        print("IPN validation data:", validation_data)
 
         if validation_data.get("status") == "VALID":
             # TODO:
