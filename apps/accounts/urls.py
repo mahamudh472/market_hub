@@ -7,7 +7,7 @@ from apps.vendor.views import VendorProfileView, VendorProfileSubmissionView
 
 
 urlpatterns = [
-    path('<str:user_type>/login/', views.CustomTokenObtainPairView.as_view(), name='login'),
+    path('login/', views.CustomTokenObtainPairView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('<str:user_type>/register/', views.RegisterView.as_view(), name='register'),
