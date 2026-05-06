@@ -18,7 +18,7 @@ class CategoryListView(generics.ListAPIView):
     """All top-level categories with nested subcategories + product counts."""
     permission_classes = [permissions.AllowAny]
     serializer_class = CategorySerializer
-    pagination_class = DefaultPagination
+    # pagination_class = DefaultPagination
 
     def get_queryset(self):
         categories = Category.objects.filter(parent__isnull=True).order_by('name')

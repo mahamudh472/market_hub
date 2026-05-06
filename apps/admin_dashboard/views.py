@@ -69,4 +69,4 @@ class AdminCategoryListView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = AdminCategorySerializer
     permission_classes = [IsAdminUser]
-    pagination_class = AdminCategoryListPagination
+    # pagination_class = AdminCategoryListPagination
